@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Moniepoint Personal Record</title>
+
+<meta name="theme-color" content="#121712">
+<meta name="description" content="Daily cash and POS transaction record for Moniepoint agents.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ==================== START DAY ==================== -->
+  <section id="screen-start" class="screen active">
+    <div class="start-wrap">
+      <div class="start-mark">M</div>
+      <h1>Start your day</h1>
+      <p class="sub">Enter what you're starting with. This becomes part of your permanent record for today.</p>
+      <div class="live-datetime">Opening will be timestamped: <strong id="startLiveDate"></strong></div>
+
+      <form id="startDayForm">
+        <div class="field">
+          <label for="openCash">Opening cash (physical)</label>
+          <div class="naira-input">
+            <span>&#8358;</span>
+            <input type="number" id="openCash" min="0" step="1" inputmode="decimal" placeholder="0" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="openPos">Opening POS balance (electronic)</label>
+          <div class="naira-input">
+            <span>&#8358;</span>
+            <input type="number" id="openPos" min="0" step="1" inputmode="decimal" placeholder="0" required>
+          </div>
+        </div>
+
+        <div class="total-preview">
+          <span class="label">Opening total</span>
+          <span class="value" id="openTotalPreview">&#8358;0</span>
+        </div>
+
+        <button type="submit" class="btn btn-gold">Start day</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== DASHBOARD ==================== -->
+  <section id="screen-main" class="screen">
+    <header class="topbar">
+      <div class="title-block">
+        <p class="eyebrow">Today</p>
+        <p class="title">Your Record</p>
+      </div>
+      <div class="actions">
+        <button class="icon-btn" id="historyBtn" title="History">&#128337;</button>
+      </div>
+    </header>
+
+    <div class="day-summary-card">
+      <div class="row-top">
+        <div class="opened-at" id="dashOpenedAt"></div>
+      </div>
+      <div class="opening-total-label">Opening total</div>
+      <div class="opening-total-value" id="dashOpeningTotal">&#8358;0</div>
+      <div class="breakdown">
+        <div>Cash: <strong id="dashOpeningCash">&#8358;0</strong></div>
+        <div>POS: <strong id="dashOpeningPos">&#8358;0</strong></div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-chip"><div class="n" id="statTxCount">0</div><div class="l">Transactions today</div></div>
+      <div class="stat-chip"><div class="n" id="statCharges">&#8358;0</div><div class="l">Charges earned</div></div>
+    </div>
+
+    <p class="section-label">Today's transactions</p>
+    <div class="tx-list" id="txList"></div>
+
+    <div class="bottom-actions">
+      <button class="btn btn-outline" id="endDayBtn">End day</button>
+    </div>
+
+    <button class="fab" id="addTxBtn">&#43; Add transaction</button>
+  </section>
+
+  <!-- ==================== DAY CLOSED SUMMARY ==================== -->
+  <section id="screen-closed" class="screen">
+    <div class="closed-wrap">
+      <div class="check">&#10003;</div>
+      <h1>Day closed</h1>
+      <p class="sub" id="closedDate"></p>
+
+      <div class="profit-card">
+        <div class="label">Profit for the day</div>
+        <div class="value" id="closedProfit">&#8358;0</div>
+        <div class="compare-grid">
+          <div class="item"><div class="l">Opening total</div><div class="v" id="closedOpeningTotal">&#8358;0</div></div>
+          <div class="item"><div class="l">Closing total</div><div class="v" id="closedClosingTotal">&#8358;0</div></div>
+        </div>
+      </div>
+
+      <div class="mini-stats">
+        <div class="stat-chip"><div class="n" id="closedTxCount">0</div><div class="l">Transactions</div></div>
+        <div class="stat-chip"><div class="n" id="closedCharges">&#8358;0</div><div class="l">Charges earned</div></div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:10px;">
+        <button class="btn btn-outline" id="closedViewDetailBtn">View full record</button>
+      </div>
+      <button class="btn btn-gold" id="startNewDayBtn">Start new day</button>
+    </div>
+  </section>
+
+  <!-- ==================== HISTORY ==================== -->
+  <section id="screen-history" class="screen">
+    <header class="topbar">
+      <button class="back-btn" id="historyBackBtn">&#8592; Back</button>
+    </header>
+    <p class="section-label">Closed days</p>
+    <div class="history-list" id="historyList"></div>
+  </section>
+
+  <!-- ==================== DAY DETAIL ==================== -->
+  <section id="screen-detail" class="screen">
+    <header class="topbar">
+      <button class="back-btn" id="detailBackBtn">&#8592; Back to history</button>
+    </header>
+    <p class="section-label" id="detailDate"></p>
+    <div class="detail-content" id="detailContent"></div>
+  </section>
+
+</div>
+
+<!-- ==================== ADD/EDIT TRANSACTION SHEET ==================== -->
+<div class="overlay" id="txOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="txSheetTitle">Add transaction</h2>
+    <div class="sheet-meta" id="txTimePreview"></div>
+
+    <form id="txForm">
+      <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:8px;">Transaction type</label>
+      <div class="type-toggle" id="typeToggle"></div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="txAmount">Amount</label>
+          <div class="naira-input">
+            <span>&#8358;</span>
+            <input type="number" id="txAmount" min="0" step="1" inputmode="decimal" placeholder="0" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="txCharge">Charge</label>
+          <div class="naira-input">
+            <span>&#8358;</span>
+            <input type="number" id="txCharge" min="0" step="1" inputmode="decimal" placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="txNote">Note (optional)</label>
+        <textarea id="txNote" placeholder="Anything worth remembering about this one"></textarea>
+      </div>
+
+      <div class="receipt-preview">
+        <span id="txReceiptPreview"></span>
+        <span>Time auto-recorded</span>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-danger" id="txDeleteBtn" style="display:none;">Delete</button>
+        <button type="button" class="btn btn-outline" id="txCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-gold" id="txSaveBtn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== END DAY SHEET ==================== -->
+<div class="overlay" id="endDayOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>End day</h2>
+    <div class="sheet-meta">Count your cash and check your POS balance, then enter what you have now.</div>
+
+    <form id="endDayForm">
+      <div class="field">
+        <label for="closeCash">Closing cash (physical)</label>
+        <div class="naira-input">
+          <span>&#8358;</span>
+          <input type="number" id="closeCash" min="0" step="1" inputmode="decimal" placeholder="0" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="closePos">Closing POS balance (electronic)</label>
+        <div class="naira-input">
+          <span>&#8358;</span>
+          <input type="number" id="closePos" min="0" step="1" inputmode="decimal" placeholder="0" required>
+        </div>
+      </div>
+
+      <div class="total-preview">
+        <span class="label">Closing total</span>
+        <span class="value" id="closeTotalPreview">&#8358;0</span>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-outline" id="endDayCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-gold">Close day</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
